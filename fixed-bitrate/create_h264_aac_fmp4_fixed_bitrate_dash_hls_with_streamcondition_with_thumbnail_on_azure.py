@@ -129,7 +129,7 @@ def main():
 
         # Create Thumbnails from 540p output
         if profile_h264.get('height') == 540:
-            video_muxing_output = EncodingOutput(
+            thumbnail_output = EncodingOutput(
                 output_id=azure_output.id,
                 output_path=f"{OUTPUT_BASE_PATH}thumbnail",
                 acl=[AclEntry(permission=AclPermission.PUBLIC_READ)])
@@ -142,7 +142,7 @@ def main():
                     pattern="thumbnail-%number%.jpg",
                     unit=ThumbnailUnit.SECONDS,
                     positions=THUMBNAIL_POSITION_IN_SECONDS,
-                    outputs=[video_muxing_output]
+                    outputs=[thumbnail_output]
                 )
             )
 
