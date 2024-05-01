@@ -30,6 +30,7 @@
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
+.idea/**/watcherTasks.xml
 
 # Gradle
 .idea/**/gradle.xml
@@ -91,5 +92,8 @@ fabric.properties
 modules.xml
 .idea/misc.xml
 *.ipr
+
+# Ignore Mac OS system files
+.DS_Store
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+iml
