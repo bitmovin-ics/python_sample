@@ -18,7 +18,6 @@ from bitmovin_api_sdk import DashRepresentationType, DashRepresentationTypeMode
 from bitmovin_api_sdk import HlsManifest, HlsVersion
 from bitmovin_api_sdk import AudioMediaInfo
 from bitmovin_api_sdk import StreamInfo
-from bitmovin_api_sdk import Trimming
 
 import datetime
 import time
@@ -30,7 +29,7 @@ S3_INPUT_ACCESS_KEY = '<INSERT_YOUR_ACCESS_KEY>'
 S3_INPUT_SECRET_KEY = '<INSERT_YOUR_SECRET_KEY>'
 S3_INPUT_BUCKET_NAME = '<INSERT_YOUR_BUCKET_NAME>'
 
-INPUT_PATH = "hdr10/Sony Bravia OLED 4K Demo.mp4" # from https://4kmedia.org/
+INPUT_PATH = "hdr10/Sony Bravia OLED 4K Demo.mp4"  # from https://4kmedia.org/
 
 S3_OUTPUT_ACCESS_KEY = '<INSERT_YOUR_ACCESS_KEY>'
 S3_OUTPUT_SECRET_KEY = '<INSERT_YOUR_SECRET_KEY>'
@@ -44,6 +43,7 @@ api = BitmovinApi(api_key=API_KEY, tenant_org_id=ORG_ID, logger=BitmovinApiLogge
 encoding_profiles_h265_pertitle = [
     dict(height=None, profile=ProfileH265.MAIN10, level=None, mode=StreamMode.PER_TITLE_TEMPLATE, aqs=1.2),
 ]
+
 
 def main():
     # Create an S3 input. This resource is used as a base to acquire input files.
@@ -140,8 +140,9 @@ def main():
                               name='Stream H265 {}p'.format(encoding_profile.get('height')),
                               mode=encoding_profile.get('mode'))
 
-        encoding_config['h265_stream'] = api.encoding.encodings.streams.create(stream=video_stream,
-                                                                      encoding_id=encoding.id)
+        encoding_config['h265_stream'] = api.encoding.encodings.streams.create(
+            stream=video_stream,
+            encoding_id=encoding.id)
 
     # create the stream for the audio
     audio_stream = Stream(codec_config_id=audio_codec_configuration.id,
@@ -163,8 +164,9 @@ def main():
                                   init_segment_name='init.mp4',
                                   segment_naming='seg_%number%.m4s',
                                   segment_length=6)
-        encoding_config['fmp4_muxing'] = api.encoding.encodings.muxings.fmp4.create(encoding_id=encoding.id,
-                                                                           fmp4_muxing=video_muxing)
+        encoding_config['fmp4_muxing'] = api.encoding.encodings.muxings.fmp4.create(
+            encoding_id=encoding.id,
+            fmp4_muxing=video_muxing)
 
     audio_muxing_stream = MuxingStream(stream_id=audio_stream.id)
     audio_muxing_output = EncodingOutput(output_id=s3_output.id,
@@ -176,8 +178,9 @@ def main():
                                    init_segment_name='init.mp4',
                                    segment_naming='seg_%number%.m4s',
                                    segment_length=6)
-    audio_fmp4_muxing = api.encoding.encodings.muxings.fmp4.create(encoding_id=encoding.id,
-                                                          fmp4_muxing=audio_fmp4_muxing)
+    audio_fmp4_muxing = api.encoding.encodings.muxings.fmp4.create(
+        encoding_id=encoding.id,
+        fmp4_muxing=audio_fmp4_muxing)
 
     # Keep the audio info together
     audio_representation_info = dict(
@@ -315,6 +318,7 @@ def main():
                                                                    stream_info=variant_stream)
     execute_hls_manifest(hls_manifest)
 
+
 def execute_encoding(encoding, start_encoding_request):
     api.encoding.encodings.start(encoding_id=encoding.id, start_encoding_request=start_encoding_request)
 
@@ -328,11 +332,13 @@ def execute_encoding(encoding, start_encoding_request):
 
     print("Encoding finished successfully")
 
+
 def wait_for_enoding_to_finish(encoding_id):
     time.sleep(5)
     task = api.encoding.encodings.status(encoding_id=encoding_id)
     print("Encoding status is {} (progress: {} %)".format(task.status, task.progress))
     return task
+
 
 def execute_dash_manifest(dash_manifest):
     api.encoding.manifests.dash.start(manifest_id=dash_manifest.id)
@@ -347,6 +353,7 @@ def execute_dash_manifest(dash_manifest):
 
     print("DASH Manifest generated successfully")
 
+
 def execute_hls_manifest(hls_manifest):
     api.encoding.manifests.hls.start(manifest_id=hls_manifest.id)
 
@@ -360,17 +367,20 @@ def execute_hls_manifest(hls_manifest):
 
     print("HLS Manifest generated successfully")
 
+
 def wait_for_dash_manifest_to_finish(manifest_id):
     time.sleep(5)
     task = api.encoding.manifests.dash.status(manifest_id=manifest_id)
     print("DASH Manifest status is {} (progress: {} %)".format(task.status, task.progress))
     return task
 
+
 def wait_for_hls_manifest_to_finish(manifest_id):
     time.sleep(5)
     task = api.encoding.manifests.hls.status(manifest_id=manifest_id)
     print("HLS Manifest status is {} (progress: {} %)".format(task.status, task.progress))
     return task
+
 
 def log_task_errors(task):
     if task is None:
@@ -381,12 +391,12 @@ def log_task_errors(task):
     for message in filtered:
         print(message.text)
 
+
 def remove_output_base_path(text):
-#    if not text.startswith('/'):
-#        text = '/{}'.format(text)
     if text.startswith(OUTPUT_BASE_PATH):
         return text[len(OUTPUT_BASE_PATH):]
     return text
+
 
 if __name__ == '__main__':
     main()
