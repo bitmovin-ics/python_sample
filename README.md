@@ -46,6 +46,6 @@ SDK（https://bitmovin.com/docs/encoding/sdks) も提供されています。本
 - **forensic-watermark**: Forensic Watermarking を用いたエンコーディングを行うためのサンプルです。
 - **dolby**: Dolby Vision、Dolby Atmos フォーマット出力のエンコードを行うためのサンプルです。
 - **hdr10**: HDR10 フォーマット出力のエンコードを行うためのサンプルです。
-
+- **drm**: DRM 出力のエンコードを行うためのサンプルです。
 
 なお、本リポジトリは Bitmovin 公式のサンプル実装の日本語版を提供するものではございません。一実装例として参照ください。
