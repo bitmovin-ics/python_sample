@@ -94,6 +94,7 @@ def main():
                 name='Sample video codec configuration',
                 height=profile_h265.get("height"),
                 bitrate=profile_h265.get("bitrate"),
+                max_bitrate=profile_h265.get("bitrate") * 2,
                 bufsize=profile_h265.get("bitrate") * 4,
                 level=profile_h265.get("level"),
                 dynamic_range_format=profile_h265.get("dynamic_range"),

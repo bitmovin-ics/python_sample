@@ -115,6 +115,7 @@ def main():
                 name='Sample video codec configuration',
                 height=video_profile.get("height"),
                 bitrate=video_profile.get("bitrate"),
+                max_bitrate=video_profile.get("bitrate") * 2,
                 bufsize=video_profile.get("bitrate") * 4,
                 level=video_profile.get("level"),
                 dynamic_range_format=video_profile.get("dynamic_range"),
