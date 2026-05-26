@@ -7,7 +7,7 @@
 本サンプルディレクトリには複数のサンプルを含んでいますが、実装しているユースケースとしては Dolby Vision と Dolby Atmos を両方をエンコードするか、 Dolby Atmos 
 のみをエンコードするかの２通りです。Dolby Atmos の入力として ADM (Audio Definition Model、wav 形式)、DAMF（Dolby Atmos Master 
 Files）があり、それぞれ読み込み方を示すためにそれぞれサンプルを加えています。または入力ファイルの取得方法として S3 からダウンロードする場合、HTTPS 
-でダウンロードする場合の実装を含んでいます。
+でダウンロードする場合の実装を含んでいます。さらに、Dolby Atmos に加えて AAC ステレオを fallback として併載するマルチコーデック構成のサンプルも含みます。
 
 
 1. Dolby Vision と Dolby Atmos の両方を含むサンプル
@@ -22,11 +22,16 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
    create_audio_only_dolbyatmos_adm_with_hls_dash.py
    create_audio_only_dolbyatmos_damf_with_hls_dash.py
    ```
+3. Dolby Vision + Dolby Atmos に AAC ステレオ fallback を加えたサンプル
+   ```text
+   create_dolbyvision_dolbyatmos_damf_aac_with_hls_dash.py
+   ```
 
 - 特記事項
   - 本サンプルでは Fragmented MP4 形式で Muxing を行っています。Dolby Vision、Dolby Atmos ともに Fragmented MP4 および MP4 Muxing の両方をサポートしています。
   - 本サンプルでは、DRM は付与していませんが、DRM ライセンスをお持ちの場合は Dolby Vision、Dolby Atmos ともに DRM をかけることもできます。
   - Dolby Vision 用のメタデータとしては、xml ファイルを side car 方式で渡すか、メザニンにメタデータも同梱するかの２通りがありますが、本サンプルでは side car 方式のみを実装しています。
+  - AAC fallback 付きサンプル (3 番) では、Atmos 非対応デバイス向けに AAC ステレオを併載しています。HLS では `aac` (DEFAULT=YES) と `atmos` (DEFAULT=NO, AUTOSELECT=YES) の 2 audio media group に分離し、各 video variant を両 group とペアリングして I-Frame playlist も付与しています。DASH では Atmos / AAC をそれぞれ別 AdaptationSet として並列に提供します。プレイヤーは codec capability に基づいて自動選択します。
 
 ## 前提条件
 
@@ -64,7 +69,12 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
    DOLBY_ATMOS_DAMF_PATH = 'netflix-opencontent/SolLevante/atmos-damf/sollevante_lp_v01_DAMF_Nearfield_48k_24b_24/sollevante_lp_v01_DAMF_Nearfield_48k_24b_24.atmos'
    ```
 
-5. 必要に応じて、出力エンコードの Profile を変更します。デフォルトでは Dolby Vision は 1080p/540p、Dolby Atmos は 448kbps/48Hz のみを出力するよう設定されています。
+5. AAC fallback 付きサンプル (3 番) を使う場合は、AAC ステレオ用メザニン (2ch PCM/WAV) のパスも設定します。
+   ```python
+   AAC_2_0_INPUT_PATH = '<INSERT_AAC_2_0_MEZZANINE_PATH>'
+   ```
+
+6. 必要に応じて、出力エンコードの Profile を変更します。デフォルトでは Dolby Vision は 1080p/540p、Dolby Atmos は 448kbps/48Hz のみを出力するよう設定されています。
    ```python
    encoding_profiles_h265_dolbyvision = [
        dict(height=1080, bitrate=2_000_000, level=None, aqs=0.5, mode=StreamMode.STANDARD, dynamic_range=H265DynamicRangeFormat.DOLBY_VISION),
@@ -75,8 +85,9 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
        dict(bitrate=448000, rate=48_000)
    ]
    ```
+   なお、AAC fallback 付きサンプル (3 番) は 2160p / 1080p / 720p / 540p の 4 段 Dolby Vision ABR ラダーと、Atmos + AAC ステレオの 2 音声を出力する構成で定義されています。
    
-6. サンプルコードを実行し、エンコードを開始します。
+7. サンプルコードを実行し、エンコードを開始します。
 
 ## 処理結果例
 
