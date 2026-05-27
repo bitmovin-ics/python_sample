@@ -31,7 +31,7 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
   - 本サンプルでは Fragmented MP4 形式で Muxing を行っています。Dolby Vision、Dolby Atmos ともに Fragmented MP4 および MP4 Muxing の両方をサポートしています。
   - 本サンプルでは、DRM は付与していませんが、DRM ライセンスをお持ちの場合は Dolby Vision、Dolby Atmos ともに DRM をかけることもできます。
   - Dolby Vision 用のメタデータとしては、xml ファイルを side car 方式で渡すか、メザニンにメタデータも同梱するかの２通りがありますが、本サンプルでは side car 方式のみを実装しています。
-  - AAC fallback 付きサンプル (3 番) では、Atmos 非対応デバイス向けに AAC ステレオを併載しています。HLS では `aac` (DEFAULT=YES) と `atmos` (DEFAULT=NO, AUTOSELECT=YES) の 2 audio media group に分離し、各 video variant を両 group とペアリングして I-Frame playlist も付与しています。DASH では Atmos / AAC をそれぞれ別 AdaptationSet として並列に提供します。プレイヤーは codec capability に基づいて自動選択します。
+  - AAC fallback 付きサンプル (3 番) では、Atmos 非対応デバイス向けに AAC ステレオを併載しています。HLS では `aac` (DEFAULT=YES) と `atmos` (DEFAULT=NO, AUTOSELECT=YES) の 2 audio media group に分離し、各 video variant を両 group とペアリングして I-Frame playlist も付与しています (Atmos デコード可能なプレイヤーは `atmos` group が紐付いた variant を、非対応プレイヤーは `aac` group が紐付いた variant を選択する形)。DASH では Atmos / AAC をそれぞれ別 AdaptationSet として並列に提供し、プレイヤーは codec capability に基づいて選択します。
 
 ## 前提条件
 

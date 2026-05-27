@@ -329,6 +329,9 @@ def _create_hls_manifest(encoding_id, output, output_path):
         if codec.type == CodecConfigType.DOLBY_ATMOS:
             atmos_codec = bitmovin_api.encoding.configurations.audio.dolby_atmos.get(
                 configuration_id=stream.codec_config_id)
+            # The actual audio rendition picked at playback is driven by the variant's AUDIO= attribute
+            # (each video variant is paired with one audio group below). DEFAULT/AUTOSELECT here only
+            # affect UX hints inside the group; we keep them explicit for spec clarity.
             bitmovin_api.encoding.manifests.hls.media.audio.create(
                 manifest_id=hls_manifest.id,
                 audio_media_info=AudioMediaInfo(
@@ -363,7 +366,8 @@ def _create_hls_manifest(encoding_id, output, output_path):
         elif codec.type == CodecConfigType.H265:
             video_codec = bitmovin_api.encoding.configurations.video.h265.get(configuration_id=stream.codec_config_id)
 
-            # Two variants per video rendition (one per audio group).
+            # Two variants per video rendition (one per audio group). URIs include height to stay
+            # unique even if the ladder ever has two entries at the same bitrate.
             variants = []
             for audio_group in ('aac', 'atmos'):
                 variant = bitmovin_api.encoding.manifests.hls.streams.create(
@@ -372,7 +376,7 @@ def _create_hls_manifest(encoding_id, output, output_path):
                         audio=audio_group,
                         closed_captions='NONE',
                         segment_path=segment_path,
-                        uri=f'video_dv_{video_codec.bitrate}_{audio_group}.m3u8',
+                        uri=f'video_dv_{video_codec.height}p_{video_codec.bitrate}_{audio_group}.m3u8',
                         encoding_id=encoding_id,
                         stream_id=stream.id,
                         muxing_id=muxing.id))
@@ -384,7 +388,7 @@ def _create_hls_manifest(encoding_id, output, output_path):
                 manifest_id=hls_manifest.id,
                 stream_id=variants[0].id,
                 i_frame_playlist=IFramePlaylist(
-                    filename=f'video_dv_{video_codec.bitrate}_iframe.m3u8'))
+                    filename=f'video_dv_{video_codec.height}p_{video_codec.bitrate}_iframe.m3u8'))
 
     return hls_manifest
 
