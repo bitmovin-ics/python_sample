@@ -10,8 +10,8 @@
 #
 # To produce playable HLS/DASH output, audio, automatic ad placement, or a Per-Title ladder, see the full sample.
 #
-# NOTE: AI Scene Analysis currently requires the BETA encoder version. Switch encoder_version to 'STABLE'
-# once the feature is generally available. See https://developer.bitmovin.com/ .
+# NOTE: encoder_version='BETA' is set only to pick up the latest encoder fixes; it is NOT required
+# for AI Scene Analysis ('STABLE' also works). See https://developer.bitmovin.com/ .
 
 import time
 
@@ -70,7 +70,7 @@ def main():
             bucket_name=S3_OUTPUT_BUCKET_NAME,
             name='Test S3 Output'))
 
-    # === Encoding definition (BETA encoder is required for AI Scene Analysis) ===
+    # === Encoding definition (BETA picks up the latest encoder fixes; STABLE also works) ===
     encoding = bitmovin_api.encoding.encodings.create(
         encoding=Encoding(
             name=f'{TEST_ITEM}',

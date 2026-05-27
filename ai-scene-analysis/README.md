@@ -18,13 +18,13 @@
     - **asset description**: 動画のシーンを記述した JSON ファイルを出力先に生成します（`ai/` 配下）。
     - **automatic ad placement**: 検出した全シーン境界に対して、マニフェストへ SCTE cue tag を挿入します。
     - **output language codes**: AI が生成する記述の言語を指定します。`en` は既定で生成されるため、本サンプルでは追加で `ja`, `ko` を指定しています。
-  - AI Scene Analysis は現時点で **BETA エンコーダー**が必要です。サンプル内の `encoder_version='BETA'` は、機能が GA となった際に `'STABLE'` へ切り替えてください。最新状況は [Bitmovin Developer Docs](https://developer.bitmovin.com/) をご確認ください。
+  - サンプルでは最新の encoder 修正を取り込むため `encoder_version='BETA'` を指定していますが、これは AI Scene Analysis の必須要件ではありません（`'STABLE'` でも利用できます）。最新状況は [Bitmovin Developer Docs](https://developer.bitmovin.com/) をご確認ください。
   - 映像は Per-Title テンプレート（単一ストリーム）で定義しており、実際の ABR ラダーはエンコード時に Bitmovin Per-Title が自動展開します。
   - パススルー版 (`create_h264_mp4_ai_scene_analysis_passthrough_on_aws.py`) は、単一の STANDARD H.264 映像ストリーム（音声・Per-Title なし）を progressive MP4 で最小限にエンコードし、automatic ad placement と HLS/DASH マニフェスト生成は行いません。AI シーン解析結果（`ai/` 配下の JSON）の取得を主目的としたサンプルです。
 
 ## 前提条件
 
-- AI Scene Analysis に対応した Bitmovin Encoder（BETA エンコーダー）
+- AI Scene Analysis に対応した Bitmovin Encoder
 - AI Scene Analysis 関連クラスを含む Bitmovin Python SDK
 
 ## サンプルの利用方法

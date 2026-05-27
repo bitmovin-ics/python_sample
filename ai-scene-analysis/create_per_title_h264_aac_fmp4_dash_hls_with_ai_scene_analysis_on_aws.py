@@ -6,8 +6,8 @@
 #   - automatic_ad_placement: SCTE cue tags inserted at scene boundaries in the manifests
 #   - output_language_codes : languages used for the AI-generated descriptions
 #
-# NOTE: AI Scene Analysis currently requires the BETA encoder version. Switch encoder_version
-# to 'STABLE' once the feature is generally available. See https://developer.bitmovin.com/ .
+# NOTE: encoder_version='BETA' is set only to pick up the latest encoder fixes; it is NOT required
+# for AI Scene Analysis ('STABLE' also works). See https://developer.bitmovin.com/ .
 
 import time
 
@@ -75,7 +75,7 @@ def main():
             bucket_name=S3_OUTPUT_BUCKET_NAME,
             name='Test S3 Output'))
 
-    # === Encoding definition (BETA encoder is required for AI Scene Analysis) ===
+    # === Encoding definition (BETA picks up the latest encoder fixes; STABLE also works) ===
     encoding = bitmovin_api.encoding.encodings.create(
         encoding=Encoding(
             name=f'{TEST_ITEM}',
