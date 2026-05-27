@@ -104,3 +104,9 @@ __pycache__/
 *.pyc
 .ruff_cache/
 .python-version.local
+
+# Local test scripts with hardcoded credentials
+test_*.py
+
+# Local IDE tool config (not shared)
+.idea/pyLspTools.xml
