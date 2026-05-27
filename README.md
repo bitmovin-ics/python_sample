@@ -49,5 +49,9 @@ SDK（https://bitmovin.com/docs/encoding/sdks) も提供されています。本
 - **drm**: DRM 出力のエンコードを行うためのサンプルです。
 - **keyframes**: KeyFrames をAPIで指定し、その部分でセグメントをカットするエンコードを行うためのサンプルです。
 - **ai-scene-analysis**: AI Scene Analysis（AI によるシーン解析）を有効にしたエンコードを行うためのサンプルです。
+- **audio-only**: 音声のみ (AAC) のエンコードを行うためのサンプルです。
+- **fixed-bitrate**: 固定ビットレートの ABR エンコード（StreamCondition / サムネイル生成 / SFTP 出力などのバリエーションを含む）を行うためのサンプルです。
+- **webvtt**: WebVTT 字幕付き HLS エンコードを行うためのサンプルです。
+- **filters/deinterlace**: Deinterlace（インターレース解除）フィルターを適用したエンコードを行うためのサンプルです。
 
 なお、本リポジトリは Bitmovin 公式のサンプル実装の日本語版を提供するものではございません。一実装例として参照ください。
