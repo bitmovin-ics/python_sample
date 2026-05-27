@@ -48,5 +48,6 @@ SDK（https://bitmovin.com/docs/encoding/sdks) も提供されています。本
 - **hdr10**: HDR10 フォーマット出力のエンコードを行うためのサンプルです。
 - **drm**: DRM 出力のエンコードを行うためのサンプルです。
 - **keyframes**: KeyFrames をAPIで指定し、その部分でセグメントをカットするエンコードを行うためのサンプルです。
+- **ai-scene-analysis**: AI Scene Analysis（AI によるシーン解析）を有効にしたエンコードを行うためのサンプルです。
 
 なお、本リポジトリは Bitmovin 公式のサンプル実装の日本語版を提供するものではございません。一実装例として参照ください。
