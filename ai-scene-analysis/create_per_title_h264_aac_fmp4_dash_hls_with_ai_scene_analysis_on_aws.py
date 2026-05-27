@@ -264,14 +264,13 @@ def _create_hls_manifest(encoding_id, output, output_path):
                     muxing_id=muxing.id,
                     uri=f'audio_{audio_codec.bitrate}.m3u8'))
         elif codec.type == CodecConfigType.H264:
-            video_codec = bitmovin_api.encoding.configurations.video.h264.get(configuration_id=stream.codec_config_id)
             bitmovin_api.encoding.manifests.hls.streams.create(
                 manifest_id=hls_manifest.id,
                 stream_info=StreamInfo(
                     audio='audio',
                     closed_captions='NONE',
                     segment_path=segment_path,
-                    uri=f'video_{video_codec.bitrate}.m3u8',
+                    uri=f'video_{muxing.avg_bitrate}.m3u8',
                     encoding_id=encoding_id,
                     stream_id=stream.id,
                     muxing_id=muxing.id))
