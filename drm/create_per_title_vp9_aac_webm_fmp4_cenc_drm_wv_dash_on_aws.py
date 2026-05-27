@@ -176,7 +176,7 @@ def main():
         # {uuid} guarantees uniqueness across renditions even when other placeholders collide.
         video_muxing_output = EncodingOutput(
             output_id=s3_output.id,
-            output_path=OUTPUT_BASE_PATH + "video/dash/{height}p_{bitrate}_{uuid}/",
+            output_path=OUTPUT_BASE_PATH + "video/{height}p_{bitrate}_{uuid}/",
             acl=[AclEntry(permission=AclPermission.PUBLIC_READ)])
 
         webm_muxing = bitmovin_api.encoding.encodings.muxings.webm.create(
