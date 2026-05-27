@@ -36,6 +36,8 @@
     | 4 | H.265 + AAC | FMP4 | Widevine / PlayReady (DASH)、FairPlay (HLS) | CENC (CTR, IV 8 bytes) / FairPlay AES-CBC | DASH / HLS | あり |
     | 5 | VP9 (映像) + AAC (音声) | WebM (映像) / FMP4 (音声) | Widevine | CENC (CTR, IV 8 bytes) | DASH | あり |
 
+    ※ サンプル 2〜5 はコード上で `encryption_mode` を明示指定しておらず、CTR は Bitmovin API のデフォルト値です（サンプル 1 のみ `EncryptionMode.CBC` を明示指定しています）。
+
   - サンプル 1 は `CencDrm` の `encryption_mode=EncryptionMode.CBC` を指定し、1 つの CENC 設定の中に Widevine (`pssh`)・PlayReady (`la_url`)・FairPlay (`iv` / `uri`) をまとめて含めています。映像・音声の同じ FMP4 Muxing に同一の CENC 設定を適用し、DASH と HLS の両方のマニフェストから参照します。
   - サンプル 2 は、DASH 系統 (FMP4 Muxing) に CENC (Widevine + PlayReady、CTR モード)、HLS 系統 (TS Muxing) に単独の FairPlay (AES-CBC) を付与する構成です。映像・音声それぞれについて FMP4 と TS の 2 種類の Muxing を作成します。
   - サンプル 3 は Smooth Streaming 向けに、`Mp4Muxing` を `fragmented_mp4_muxing_manifest_type=FragmentedMp4MuxingManifestType.SMOOTH` で生成し (映像 `video.ismv` / 音声 `audio.isma`)、CENC PlayReady を付与して `stream.ism` / `stream.ismc` を生成します。

@@ -75,7 +75,7 @@ def main():
             bucket_name=S3_OUTPUT_BUCKET_NAME,
             name='Test S3 Output'))
 
-    # === Encoding definition (BETA encoder is required for AI Scene Analysis) ===
+    # === Encoding definition (BETA picks up the latest encoder fixes; STABLE also works) ===
     encoding = bitmovin_api.encoding.encodings.create(
         encoding=Encoding(
             name=f'{TEST_ITEM}',
