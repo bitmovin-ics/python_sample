@@ -5,7 +5,7 @@
 準拠のエンコードを行いつつ、クラウドを利用した分散エンコードを用いて高速に処理を実行することができます。本サンプルでは Python を用いたサンプルを説明します。
 
 本サンプルディレクトリには複数のサンプルを含んでいますが、実装しているユースケースとしては Dolby Vision と Dolby Atmos を両方をエンコードするか、 Dolby Atmos 
-のみをエンコードするかの２通りです。Dolby Atmos の入力として ADM (Audio Definition Model、wav 形式)、DAMF（Dolby Atmos Master 
+のみをエンコードするかの２通りを基本としています。Dolby Atmos の入力として ADM (Audio Definition Model、wav 形式)、DAMF（Dolby Atmos Master 
 Files）があり、それぞれ読み込み方を示すためにそれぞれサンプルを加えています。または入力ファイルの取得方法として S3 からダウンロードする場合、HTTPS 
 でダウンロードする場合の実装を含んでいます。さらに、Dolby Atmos に加えて AAC ステレオを fallback として併載するマルチコーデック構成のサンプルも含みます。加えて、Dolby Vision 入力から Dolby Vision / HDR10 / SDR の 3 つの視聴体験を 1 つの HLS/DASH マニフェストで配信するマルチエンコーディング構成のサンプルも含みます。
 
@@ -47,6 +47,7 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
 ## 前提条件
 
 - Bitmovin Encoder バージョン 2.31.0 以降
+- DV/HDR10/SDR 配信サンプル (4 番) が利用するダイナミックレンジ変換 (HDR-SDR 変換・DV 入力からの HDR10 導出) には、Bitmovin ドキュメント上より新しい Encoder (2.98.0 以降) が必要です。サンプルは `encoder_version='STABLE'` を指定しているため、通常はそのまま動作します
 
 ## サンプルの利用方法
 
@@ -85,12 +86,12 @@ Files）があり、それぞれ読み込み方を示すためにそれぞれサ
    AAC_2_0_INPUT_PATH = '<INSERT_AAC_2_0_MEZZANINE_PATH>'
    ```
 
-6. DV/HDR10/SDR 配信サンプル (4 番) のうち `dv_and_sdr_inputs` を使う場合は、SDR (BT.709) 用メザニンのパスも設定します。
+6. DV/HDR10/SDR 配信サンプル (4 番) のうち `dv_and_sdr_inputs` を使う場合は、SDR (BT.709) 用メザニンのパスも設定します。ABR ラダーを揃えるため、DV メザニンと同一内容・同一尺・同一フレームレートのファイルが必要です。
    ```python
    SDR_INPUT_PATH = '<INSERT_SDR_VIDEO_MEZZANINE_PATH>'
    ```
 
-7. 必要に応じて、出力エンコードの Profile を変更します。デフォルトでは Dolby Vision は 1080p/540p、Dolby Atmos は 448kbps/48Hz のみを出力するよう設定されています。
+7. 必要に応じて、出力エンコードの Profile を変更します。デフォルト (1〜2 番のサンプル) では Dolby Vision は 1080p/540p、Dolby Atmos は 448kbps/48Hz のみを出力するよう設定されています。
    ```python
    encoding_profiles_h265_dolbyvision = [
        dict(height=1080, bitrate=2_000_000, level=None, aqs=0.5, mode=StreamMode.STANDARD, dynamic_range=H265DynamicRangeFormat.DOLBY_VISION),

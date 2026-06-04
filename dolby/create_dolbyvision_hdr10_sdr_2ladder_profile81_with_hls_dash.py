@@ -140,9 +140,16 @@ def main():
 
     # Start both encodings (no manifests here — they are generated afterwards across both
     # encodings), then wait for them concurrently and fail fast (stop the other) if either errors.
+    # An exception during start must not leave an already-started encoding running either.
     encodings = [encoding_dv, encoding_sdr]
-    for encoding in encodings:
-        _start_encoding(encoding)
+    started_ids = []
+    try:
+        for encoding in encodings:
+            _start_encoding(encoding)
+            started_ids.append(encoding.id)
+    except BaseException:
+        _stop_encodings(started_ids)
+        raise
     _await_all_encodings(encodings)
 
     # === Build + generate one combined HLS master and one combined DASH MPD ===
@@ -326,40 +333,45 @@ def _await_all_encodings(encodings):
     """Wait for several encodings that run concurrently. Each cycle polls EVERY still-running
     encoding (not one after another), so a failure is detected within one poll interval no
     matter how long the other encodings take. Fails fast: on the first non-success terminal
-    state, the remaining encodings are stopped and an exception is raised. Returns only once
-    all encodings have finished successfully.
+    state — or ANY exception while polling — the remaining encodings are stopped and the
+    error is re-raised. Returns only once all encodings have finished successfully.
 
     Progress is printed as ONE compact line per poll cycle (short ladder labels, e.g.
     "dv81 RUNNING 5% | sdr RUNNING 18%"), and only when something changed since the last
     printed line — plus a heartbeat at most every 12 cycles (~1 min) so long quiet
     stretches still show the script is alive."""
     failed_states = (Status.ERROR, Status.TRANSFER_ERROR, Status.CANCELED)
-    pending = {encoding.id: encoding.name for encoding in encodings}
+    # Short ladder labels (encoding name minus the TEST_ITEM prefix), derived once up front.
+    pending = {encoding.id: encoding.name.replace(f'{TEST_ITEM}-', '', 1) for encoding in encodings}
     last_line = None
     cycles_since_print = 0
-    while pending:
-        time.sleep(5)
-        snapshot = []
-        for encoding_id in list(pending.keys()):
-            short_name = pending[encoding_id].replace(f'{TEST_ITEM}-', '', 1)
-            task = bitmovin_api.encoding.encodings.status(encoding_id=encoding_id)
-            snapshot.append(f"{short_name} {task.status.value} {task.progress or 0}%")
-            if task.status is Status.FINISHED:
-                print(f"Encoding '{short_name}' finished successfully")
-                del pending[encoding_id]
-            elif task.status in failed_states:
-                _log_task_errors(task=task)
-                others = [eid for eid in pending if eid != encoding_id]
-                _stop_encodings(others)
-                raise Exception(
-                    f"Encoding '{short_name}' ended with status {task.status.value}; "
-                    f"stopped {len(others)} remaining encoding(s) to fail fast")
-        line = " | ".join(snapshot)
-        cycles_since_print += 1
-        if line != last_line or cycles_since_print >= 12:
-            print(f"Encodings: {line}")
-            last_line = line
-            cycles_since_print = 0
+    try:
+        while pending:
+            time.sleep(5)
+            snapshot = []
+            for encoding_id in list(pending.keys()):
+                short_name = pending[encoding_id]
+                task = bitmovin_api.encoding.encodings.status(encoding_id=encoding_id)
+                snapshot.append(f"{short_name} {task.status.value} {task.progress or 0}%")
+                if task.status is Status.FINISHED:
+                    print(f"Encoding '{short_name}' finished successfully")
+                    del pending[encoding_id]
+                elif task.status in failed_states:
+                    _log_task_errors(task=task)
+                    # Already terminal — drop it so the cleanup below only stops the others.
+                    del pending[encoding_id]
+                    raise Exception(f"Encoding '{short_name}' ended with status {task.status.value}")
+            line = " | ".join(snapshot)
+            cycles_since_print += 1
+            if line != last_line or cycles_since_print >= 12:
+                print(f"Encodings: {line}")
+                last_line = line
+                cycles_since_print = 0
+    except BaseException:
+        # Fail fast: never leave sibling encodings running (and billing) after any failure —
+        # terminal API status and polling exceptions alike. The original error is re-raised.
+        _stop_encodings(list(pending.keys()))
+        raise
 
 
 def _stop_encodings(encoding_ids):
