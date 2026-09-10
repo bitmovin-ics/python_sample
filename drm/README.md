@@ -56,7 +56,7 @@
     - `CENC_WIDEVINE_PSSH`: Widevine の PSSH (Base64)
     - `CENC_PLAYREADY_LA_URL`: PlayReady のライセンス取得 URL
     - `CENC_PLAYREADY_PSSH` (サンプル 6): PlayReady Object (WRMHEADER を含む Base64)。WRMHEADER 内の `KID` は `CENC_KID` と一致している必要があり、`ALGID` は暗号化方式 (CBC なら `AESCBC`) と揃える必要があります
-    - `CENC_FAIRPLAY_IV` / `CENC_FAIRPLAY_URI` (サンプル 1)、`FAIRPLAY_KEY` / `FAIRPLAY_IV` / `FAIRPLAY_URI` (サンプル 2・4): FairPlay の鍵 / IV / キー URI (`skd://...`)
+    - `CENC_FAIRPLAY_IV` / `CENC_FAIRPLAY_URI` (サンプル 1・6)、`FAIRPLAY_KEY` / `FAIRPLAY_IV` / `FAIRPLAY_URI` (サンプル 2・4): FairPlay の鍵 / IV / キー URI (`skd://...`)
   - Per-Title を使用するサンプル (2〜5) では、映像ストリームを Per-Title テンプレート (`PER_TITLE_TEMPLATE` / `PER_TITLE_TEMPLATE_FIXED_RESOLUTION_AND_BITRATE`) として定義しており、実際の ABR ラダー (レンディション) はエンコード時に Bitmovin Per-Title が自動展開します。展開後の各レンディションで出力パスが衝突しないよう、出力パスには `{height}p_{bitrate}_{uuid}` のプレースホルダーを用いています。これらのサンプルではレンディション数がエンコード後に確定するため、マニフェストはエンコード完了後に生成しています。
   - Per-Title を使用するサンプルの映像コーデック設定には、Hulu 推奨に準拠したチューニングを適用しています (VP9 では出力解像度に応じて `cpu_used` / `tile_columns` を切り替えています)。
 
@@ -95,7 +95,7 @@
    CENC_PLAYREADY_LA_URL = '<INSERT YOUR PLAYREADY LA URL>'
    # サンプル 6: LA URL の代わりに PlayReady Object (PSSH) を直接指定
    CENC_PLAYREADY_PSSH = '<INSERT YOUR PLAYREADY PSSH>'
-   # サンプル 1: CENC に内包する FairPlay
+   # サンプル 1・6: CENC に内包する FairPlay
    CENC_FAIRPLAY_IV = '<INSERT YOUR FAIRPLAY IV>'
    CENC_FAIRPLAY_URI = '<INSERT YOUR FAIRPLAY URI>'
    # サンプル 2・4: 単独 FairPlay
