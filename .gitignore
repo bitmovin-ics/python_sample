@@ -110,3 +110,8 @@ test_*.py
 
 # Local IDE tool config (not shared)
 .idea/pyLspTools.xml
+
+# Local work-product packages (zips are not scanned for secrets by pre-commit
+# tooling, and this repo is published to customers)
+*.zip
+cbcs_signaling_fix_package/
