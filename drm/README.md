@@ -24,7 +24,7 @@
    ```text
    create_per_title_vp9_aac_webm_fmp4_cenc_drm_wv_dash_on_aws.py
    ```
-6. サンプル 1 と同じ構成で、PlayReady を LA URL ではなく PSSH (PlayReady Object) で指定し、マニフェストをエンコード完了後に生成するサンプル (DASH/HLS)
+6. サンプル 1 をベースに、Widevine / PlayReady の PSSH を明示指定して cbcs signaling を制御し、マニフェストをエンコード完了後に生成するサンプル (DASH/HLS)
    ```text
    create_h264_aac_fmp4_cenc_cbc_drm_wv_pr_fp_dash_hls_on_aws_post_encoding_pr_pssh_manifest.py
    ```
@@ -48,14 +48,18 @@
   - サンプル 3 は Smooth Streaming 向けに、`Mp4Muxing` を `fragmented_mp4_muxing_manifest_type=FragmentedMp4MuxingManifestType.SMOOTH` で生成し (映像 `video.ismv` / 音声 `audio.isma`)、CENC PlayReady を付与して `stream.ism` / `stream.ismc` を生成します。
   - サンプル 4 は、エンコードは 1 回だけ行い、生成された単一の FMP4 Muxing に対して DASH 用に CENC、HLS 用に FairPlay の 2 種類の DRM をそれぞれ別の出力パスに書き出す構成です。DASH マニフェストは CENC、HLS マニフェストは FairPlay を参照します。
   - サンプル 5 は、映像を VP9 (WebM)、音声を AAC (FMP4) として別コンテナで出力し、いずれも CENC Widevine で暗号化して DASH マニフェストに content protection を付与します。
-  - サンプル 6 はサンプル 1 のバリエーションで、次の 2 点が異なります。
+  - サンプル 6 はサンプル 1 のバリエーションで、次の 3 点が異なります。
     - **PlayReady を PSSH で指定**: `CencPlayReady(la_url=...)` ではなく `CencPlayReady(pssh=CENC_PLAYREADY_PSSH)` を使用し、PlayReady Object (WRMHEADER) をそのまま渡します。LA URL のみを指定した場合、WRMHEADER は Bitmovin 側で自動生成されるため、バージョンや `ALGID` などを自分で制御できません。CBC (cbcs) では WRMHEADER の `ALGID` を `AESCBC`、バージョンを 4.3.0.0 とする必要があるため、PSSH を直接指定してマニフェストの `<mspr:pro>` / `cenc:pssh` に意図した値を載せたい場合にこの方式を使います。
     - **マニフェストをエンコード完了後に生成**: `StartEncodingRequest` に `vod_dash_manifests` / `vod_hls_manifests` を渡さずにエンコードを実行し、完了後に `manifests.dash.start` / `manifests.hls.start` を `StartManifestRequest(manifest_generator=ManifestGenerator.V2)` で個別に起動します。エンコード結果を確認してからマニフェストを生成したい場合や、マニフェストのみを再生成したい場合に有用です。
+    - **Widevine PSSH に `protection_scheme = cbcs` を指定**: サンプル 1 の `CENC_WIDEVINE_PSSH` は `algorithm = AESCTR` を持つ PSSH ですが、サンプル 6 では暗号化方式に合わせて `protection_scheme = cbcs` を持つ PSSH を使用します。PlayReady 側の `ALGID = AESCBC` と対になる指定です。
   - **DRM 鍵について (重要)**: 各サンプルではコード冒頭の定数に DRM 鍵のテスト値が直書きされています。これらはサンプルを動作させるためのプレースホルダー値であり、**本番環境では必ずご自身の値に差し替えてください**。対象となる定数は以下のとおりです (サンプルにより使用するものは異なります)。
     - `CENC_KEY` / `CENC_KID`: CENC 暗号化に用いるコンテンツ鍵と Key ID
     - `CENC_WIDEVINE_PSSH`: Widevine の PSSH (Base64)
     - `CENC_PLAYREADY_LA_URL`: PlayReady のライセンス取得 URL
-    - `CENC_PLAYREADY_PSSH` (サンプル 6): PlayReady Object (WRMHEADER を含む Base64)。WRMHEADER 内の `KID` は `CENC_KID` と一致している必要があり、`ALGID` は暗号化方式 (CBC なら `AESCBC`) と揃える必要があります
+    - `CENC_PLAYREADY_PSSH` (サンプル 6): PlayReady Object (WRMHEADER を含む Base64)。`ALGID` は暗号化方式 (CBC なら `AESCBC`) と揃える必要があります
+    - **PSSH 内の KID について (重要)**: `CENC_WIDEVINE_PSSH` / `CENC_PLAYREADY_PSSH` には **KID が埋め込まれており、これは `CENC_KID` と一致している必要があります**。PSSH に格納するのは KID であって、コンテンツ鍵 (`CENC_KEY`) ではありません。**コンテンツ鍵を PSSH に入れるとマニフェストや init セグメント経由で公開されてしまうため、絶対に入れないでください**。なお両者で KID のバイト順が異なります。
+      - Widevine: KID をそのまま (big-endian) 格納します
+      - PlayReady: WRMHEADER の `KID VALUE` は **KID を little-endian GUID (先頭 4 / 2 / 2 バイトをそれぞれ反転) にしてから Base64 encode** した値です。big-endian のまま入れるとライセンス取得に失敗します
     - `CENC_FAIRPLAY_IV` / `CENC_FAIRPLAY_URI` (サンプル 1・6)、`FAIRPLAY_KEY` / `FAIRPLAY_IV` / `FAIRPLAY_URI` (サンプル 2・4): FairPlay の鍵 / IV / キー URI (`skd://...`)
   - Per-Title を使用するサンプル (2〜5) では、映像ストリームを Per-Title テンプレート (`PER_TITLE_TEMPLATE` / `PER_TITLE_TEMPLATE_FIXED_RESOLUTION_AND_BITRATE`) として定義しており、実際の ABR ラダー (レンディション) はエンコード時に Bitmovin Per-Title が自動展開します。展開後の各レンディションで出力パスが衝突しないよう、出力パスには `{height}p_{bitrate}_{uuid}` のプレースホルダーを用いています。これらのサンプルではレンディション数がエンコード後に確定するため、マニフェストはエンコード完了後に生成しています。
   - Per-Title を使用するサンプルの映像コーデック設定には、Hulu 推奨に準拠したチューニングを適用しています (VP9 では出力解像度に応じて `cpu_used` / `tile_columns` を切り替えています)。
@@ -92,6 +96,7 @@
    CENC_KEY = '<INSERT YOUR CENC KEY>'
    CENC_KID = '<INSERT YOUR CENC KID>'
    CENC_WIDEVINE_PSSH = '<INSERT YOUR WIDEVINE PSSH>'
+   # サンプル 1〜4: PlayReady はライセンス取得 URL で指定
    CENC_PLAYREADY_LA_URL = '<INSERT YOUR PLAYREADY LA URL>'
    # サンプル 6: LA URL の代わりに PlayReady Object (PSSH) を直接指定
    CENC_PLAYREADY_PSSH = '<INSERT YOUR PLAYREADY PSSH>'
